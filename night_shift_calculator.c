@@ -1,42 +1,40 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <stdbool.h>
 
 int calculateNightShift(int shiftStart, int shiftEnd, int intervalStart, int intervalEnd) {
-	// int adjustedSE = shiftEnd + 1440;
-	int adjustedIE = intervalEnd + 1440;
-	int minute = 0;
-	int limit = 0;
 	int timeWorked = 0;
 
-	// if (shiftEnd < shiftStart) {
-	// 	adjustedSE += 1440;	// Add one day in minutes.
-	// }
-	// if (intervalEnd < intervalStart) {
-	// 	adjustedIE += 1440; // Add one day in minutes.
-	// }
-
-	if (shiftStart <= intervalStart) {
-		minute = intervalStart;
-	} else {
-		minute = shiftStart;
+	if (shiftEnd < shiftStart) {
+		shiftEnd += 24 * 60;
 	}
-	limit = adjustedIE;
 
+	for (int minute = shiftStart; minute < shiftEnd; minute++) {
+		int actualMinute = minute % (24 * 60);
+		bool isNightShift = ((intervalStart <= actualMinute && actualMinute < 1440) ||
+			(actualMinute >= 0 && actualMinute < intervalEnd));
 
-	for (int i = shiftStart; i < limit; i++) {
-		if (minute < 1440) {
-			if(minute <= adjustedIE) {
-				timeWorked++;
-			}
-		} else {
-			minute = minute % 1440;
-			if(minute <= intervalEnd) {
-				timeWorked++;
-			}
+		if (isNightShift) {
+			timeWorked++;
 		}
-		minute++;
 	}
+	
 	return timeWorked;
+}
+
+int calculateNightFactor(int timeWorked) {
+	float nightFactor = 52.5;
+	
+	int nightHours = floor(timeWorked / nightFactor);
+	printf("Night Hours: %d\n", nightHours);
+	float remainingMinutes = fmod(timeWorked, nightFactor);
+	printf("Remaining Minutes: %f\n", remainingMinutes);
+	int convertedMinutes = round(remainingMinutes / nightFactor) * 60;
+	printf("Converted Minutes: %d\n", convertedMinutes);
+
+	printf("TOTAL: %d\n", nightHours * 60 + convertedMinutes);
+	return (nightHours * 60) + convertedMinutes;
 }
 
 int main(void) {
@@ -44,7 +42,7 @@ int main(void) {
 	int shiftEnd = 0;
 	int intervalStart = 0;
 	int intervalEnd = 0;
-	// int timeWorked = 0;
+	bool nightFactor = true;
 
 	printf("Inicio da Jornada: ");
 	scanf("%d", &shiftStart);
@@ -57,8 +55,11 @@ int main(void) {
 	scanf("%d", &intervalEnd);
 
 	int timeWorked = calculateNightShift(shiftStart, shiftEnd, intervalStart, intervalEnd);
-
-	printf('Tempo noturno trabalhado: %d\n', timeWorked);
+	printf("Tempo noturno trabalhado: %d\n", timeWorked);
+	if (timeWorked && nightFactor) {
+		int timeFactored = calculateNightFactor(timeWorked);
+		printf("Tempo noturno com fator: %d\n", timeFactored);
+	}
 
 	return 0;
 }
