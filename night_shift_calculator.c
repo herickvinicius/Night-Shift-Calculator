@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdbool.h>
+#include <string.h>
 
 int calculateNightShift(int shiftStart, int shiftEnd, int intervalStart, int intervalEnd) {
 	int timeWorked = 0;
@@ -11,17 +12,11 @@ int calculateNightShift(int shiftStart, int shiftEnd, int intervalStart, int int
 	}
 
 	for (int minute = shiftStart; minute < shiftEnd; minute++) {
-		int actualMinute = minute % (24 * 60);
-		bool isNightShift = ((intervalStart <= actualMinute && actualMinute < 1440) ||
-			(actualMinute >= 0 && actualMinute <= intervalEnd));
-
-		// CORNER CASE FOUND! To fix it, translate the TS code below to C and replace the code in line 15.
-		/*
-		*	const crossesMidnight = intervalEnd <= intervalStart;
-		*	const isNightShift = crossesMidnight
-		*		? (currentMinute >= intervalStart || currentMinute < intervalEnd)
-		*		: (currentMinute >= intervalStart && currentMinute < intervalEnd);
-		*/
+		int currentMinute = minute % (24 * 60);
+		bool crossesMidnight = intervalEnd <= intervalStart;
+		bool isNightShift = crossesMidnight
+			? (currentMinute >= intervalStart || currentMinute < intervalEnd)
+			: (currentMinute >= intervalStart && currentMinute < intervalEnd);
 
 		if (isNightShift) {
 			timeWorked++;
@@ -31,45 +26,60 @@ int calculateNightShift(int shiftStart, int shiftEnd, int intervalStart, int int
 	return timeWorked;
 }
 
-// int calculateNightFactor(int timeWorked) {
-// 	float nightFactor = 52.5;
+int calculateNightFactor(int timeWorked) {
+	float nightFactor = 52.5;
 	
-// 	int nightHours = floor(timeWorked / nightFactor);
-// 	printf("Night Hours: %d\n", nightHours);
+	int nightHours = floor(timeWorked / nightFactor);
+	printf("Night Hours: %d\n", nightHours);
 
-// 	float remainingMinutes = fmod(timeWorked, nightFactor);
-// 	printf("Remaining Minutes: %f\n", remainingMinutes);
+	float remainingMinutes = fmod(timeWorked, nightFactor);
+	printf("Remaining Minutes: %f\n", remainingMinutes);
 	
-// 	int convertedMinutes = round(remainingMinutes / nightFactor) * 60;
-// 	printf("Converted Minutes: %d\n", convertedMinutes);
+	int convertedMinutes = round(remainingMinutes / nightFactor) * 60;
+	printf("Converted Minutes: %d\n", convertedMinutes);
 
-// 	printf("TOTAL: %d\n", nightHours * 60 + convertedMinutes);
-// 	return (nightHours * 60) + convertedMinutes;
-// }
+	printf("TOTAL: %d\n", nightHours * 60 + convertedMinutes);
+	return (nightHours * 60) + convertedMinutes;
+}
 
 int main(void) {
 	int shiftStart = 0;
 	int shiftEnd = 0;
 	int intervalStart = 0;
 	int intervalEnd = 0;
-	bool nightFactor = true;
+	char response[1];
+	bool nightFactor;
 
-	printf("Inicio da Jornada: ");
+	printf("Insert the time in minutes ((Hour * 60) + minutes\n\n");
+
+	printf("Work shift start: ");
 	scanf("%d", &shiftStart);
-	printf("Fim da Jornada: ");
+	printf("Work shift end: ");
 	scanf("%d", &shiftEnd);
 
-	printf("Inicio da Intervalo: ");
+	printf("Interval start: ");
 	scanf("%d", &intervalStart);
-	printf("Fim da Intervalo: ");
+	printf("Interval end: ");
 	scanf("%d", &intervalEnd);
 
+	printf("Do you want to calculate with Night Factor? [y/n]\n");
+	scanf("%s", response);
+
+	if (strcmp(response, "y") == 0 || strcmp(response, "Y") == 0) {
+		nightFactor = true;
+	} else if (strcmp(response, "n") == 0 || strcmp(response, "N") == 0) {
+		nightFactor = false;
+	} else {
+		printf("Not a real answer, huh?\n");
+		return 1;
+	}
+
 	int timeWorked = calculateNightShift(shiftStart, shiftEnd, intervalStart, intervalEnd);
-	printf("Tempo noturno trabalhado: %d\n", timeWorked);
-	// if (timeWorked && nightFactor) {
-	// 	int timeFactored = calculateNightFactor(timeWorked);
-	// 	printf("Tempo noturno com fator: %d\n", timeFactored);
-	// }
+	printf("Total night time wowrked: %d\n", timeWorked);
+	if (timeWorked && nightFactor) {
+		int timeFactored = calculateNightFactor(timeWorked);
+		printf("Total night time (with reduced hour rule applied): %d\n", timeFactored);
+	}
 
 	return 0;
 }
