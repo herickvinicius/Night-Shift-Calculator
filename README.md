@@ -1,4 +1,4 @@
-````markdown
+
 # Night Shift Calculator
 
 A small C program to calculate worked hours—including night-shift calculation, overtime, and negative hours—based on clock-in/out times.
